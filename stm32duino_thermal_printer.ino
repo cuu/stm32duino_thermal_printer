@@ -107,7 +107,7 @@ void printer_test(CONFIG*cfg){
   uint16_t k;
   
   char buf[48];  
-  char *font_names[]={"IBM_PS2thin2_8x16","5x7_ISO8859_1","6x12_ISO8859_1","7x14_ISO8859_1","IBM_PS2thin1_8x16"};
+  char *font_names[]={"IBM_PS2thin1_8x16","5x7_ISO8859_1","6x12_ISO8859_1","7x14_ISO8859_1","IBM_PS2thin2_8x16"};
   
   cfg->density = 4;
   
@@ -125,7 +125,7 @@ void printer_test(CONFIG*cfg){
  
 //---------------------------------------------     
 
-  for(i=1;i<4;i++){
+  for(i=1;i<5;i++){
     printer_set_font(cfg,0);
     reset_cmd();
     for(j=0;j<strlen(font_names[i]);j++){
