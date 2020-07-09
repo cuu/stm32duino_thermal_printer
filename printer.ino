@@ -238,34 +238,36 @@ void PrintDots8bit_split(CONFIG*cfg,uint8_t *Array, uint8_t characters)
   uint8_t blank;
   uint16_t pts;
   uint8_t temp[48];
+  uint8_t _array[48];
   pts = 0;
-    
+  memcpy(_array,Array,48);
+  
   while( (i< characters) && (i < MAX)) {
 
     pts = pts + bits_number(Array[i]);
     
     if(pts > MAX_PRINT_PTS) {
       memset(temp,0,48);
-      memcpy(temp,Array,i);
+      memcpy(temp,_array,i);
       PrintDots8bit(cfg,temp,characters,0);
-      pts = bits_number(Array[i]);
-      memset(Array,0,i);
+      pts = bits_number(_array[i]);
+      memset(_array,0,i);
     }else if(pts==MAX_PRINT_PTS) {
       memset(temp,0,48);
-      memcpy(temp,Array,i+1);      
+      memcpy(temp,_array,i+1);      
       PrintDots8bit(cfg,temp,characters,0);
       pts=0;
-      memset(Array,0,i+1);
+      memset(_array,0,i+1);
     }
     i++;
   }
 
   if(pts >0){
-    PrintDots8bit(cfg,Array,characters,0);
+    PrintDots8bit(cfg,_array,characters,0);
     pts = 0;
   }
 
-  feed_pitch1(FEED_PITCH,cfg->orient);
+  feed_pitch1(cfg->feed_pitch,cfg->orient);
 
   return;
 }
@@ -334,8 +336,11 @@ void PrintDots8bit(CONFIG*cfg,uint8_t *Array, uint8_t characters,uint8_t feed_nu
          
           y++;
       }
-      
+
+
     feed_pitch1(feed_num,cfg->orient);
+
+      
     DISABLE_VH;
 
     return;
@@ -424,7 +429,8 @@ void print_lines8(CONFIG*cfg) {
       dot_line_bitsidx = line_bits%8;
       memset(dot_line_data,0,MAXPIXELS);
       i = lastidx;
- 
+      //DEBUG("i",i)
+      //DEBUG("ser_cache.idx",ser_cache.idx)
       while( i <ser_cache.idx){
         addr = pad*ser_cache.data[i]*current_font.height;
         for(j=0;j<pad;j++){
@@ -490,8 +496,11 @@ void print_lines8(CONFIG*cfg) {
         }
       }
       
-      if(IsPaper()== IS_PAPER)
-        PrintDots8bit(cfg,dot_line_data,dot_line_idx+1,2);
+      if(IsPaper()== IS_PAPER){
+        //DEBUG("dot_line_idx",dot_line_idx);
+        //DEBUG("dot_line_bits",dot_line_bitsidx);
+        PrintDots8bit_split(cfg,dot_line_data,dot_line_idx+1);
+      }
         
       row++;
     }
@@ -545,7 +554,7 @@ void print_image8(CONFIG*cfg){
     //feed_pitch1(FEED_PITCH,BACKWARD);
     y++;
   }
-  feed_pitch1(FEED_PITCH,BACKWARD);
+  feed_pitch1(cfg->feed_pitch,cfg->orient);
   cfg->img->need_print= 0;
   
   cfg->img->num = 0;

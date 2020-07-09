@@ -71,7 +71,7 @@
 #define FORWARD           0x00
 #define BACKWARD          0x01
 
-#define FEED_PITCH   2
+//#define FEED_PITCH   2
 
 
 #define BCoefficent       3950
@@ -165,7 +165,7 @@ typedef struct CONFIG
   uint8_t reverse; //reverse print   
   uint8_t orient;
   uint8_t under_line;
-  
+  uint8_t feed_pitch;
   uint8_t density:4; //0-f,300+density*46 HEAT_TIME
 
   uint16_t wordgap:10;//1023 max

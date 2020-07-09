@@ -3,11 +3,11 @@
 #include <SPI.h>
 
 #include "logo.h"
-#include "font12x24.h"
+
 #include "pcf_5x7-ISO8859-1_5x7.h"
 #include "pcf_6x12-ISO8859-1_6x12.h"
 #include "pcf_7x14-ISO8859-1_7x14.h"
-#include "ttf_Px437_IBM_ISO8_8x16.h"
+//#include "ttf_Px437_IBM_ISO8_8x16.h"
 //#include "ttf_Px437_IBM_ISO9_8x16.h"
 
 #include "ttf_Px437_IBM_PS2thin1_8x16.h"
@@ -67,10 +67,10 @@ void init_printer(){
   //current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_IBM_ISO8_8x16;
   //current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_IBM_ISO9_8x16;
   
-  current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_IBM_PS2thin1_8x16;
   current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_IBM_PS2thin2_8x16;
 */
-  current_font.width=12; current_font.height=24; current_font.data = console_font_12x24; 
+  current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_IBM_PS2thin1_8x16;
+
 
   ser_cache.idx=0;
 
@@ -93,7 +93,8 @@ void init_printer(){
 
   g_config.img = &img_cache;
   g_config.density = 0;
-  
+
+  g_config.feed_pitch = 2;
   
 }
 
@@ -101,12 +102,14 @@ const  char url[]  ={"https://www.clockworkpi.com"};
 
 void printer_test(CONFIG*cfg){
 
-  uint8_t i;
+  uint8_t i,j;
   uint8_t ch;
   uint16_t k;
   
   char buf[48];  
-  cfg->density = 3;
+  char *font_names[]={"IBM_PS2thin2_8x16","5x7_ISO8859_1","6x12_ISO8859_1","7x14_ISO8859_1","IBM_PS2thin1_8x16"};
+  
+  cfg->density = 4;
   
   k = (os120_width/8)*os120_height;
   memcpy(cfg->img->cache,os120_bits,k);
@@ -119,52 +122,98 @@ void printer_test(CONFIG*cfg){
   cfg->img->revert_bits=0;
   cfg->align = ALIGN_LEFT;
   feed_pitch1(15,cfg->orient);
-  
+ 
 //---------------------------------------------     
-  for(i=1;i<8;i++){
-    printer_set_font(cfg,i);
-    reset_cmd();
-    for(ch = 33;ch<128;ch++){
-      parse_serial_stream(cfg,ch);      
-      //Serial.print(ch,DEC);
-    }
-    parse_serial_stream(cfg,10);
-    //Serial.println();
-    feed_pitch1(cfg->font->height,cfg->orient);
-  }
-  
+
+  for(i=1;i<4;i++){
     printer_set_font(cfg,0);
     reset_cmd();
-    for(ch = 33;ch<128;ch++){
+    for(j=0;j<strlen(font_names[i]);j++){
+      
+      parse_serial_stream(cfg,font_names[i][j]);      
+    }
+    parse_serial_stream(cfg,10);
+    
+    printer_set_font(cfg,i);
+    reset_cmd();
+    for(ch = 33;ch<127;ch++){
       parse_serial_stream(cfg,ch);      
       //Serial.print(ch,DEC);
     }
     parse_serial_stream(cfg,10);
     //Serial.println();
-    feed_pitch1(cfg->font->height,cfg->orient);
-
+    feed_pitch1(48,cfg->orient);
+  }
 
   
-  
-  feed_pitch1(cfg->font->height,cfg->orient);
- 
-  k = temperature();
- 
-  sprintf(buf,"temperature:        %d C",k);
-  printer_set_font(cfg,6);
+  printer_set_font(cfg,0);
   reset_cmd();
+  for(j=0;j<strlen(font_names[0]);j++){    
+    parse_serial_stream(cfg,font_names[0][j]);      
+  }  
+  parse_serial_stream(cfg,10);
+  
+  printer_set_font(cfg,0);
+  reset_cmd();
+  for(ch = 33;ch<127;ch++){
+    parse_serial_stream(cfg,ch);      
+    //Serial.print(ch,DEC);
+  }
+  parse_serial_stream(cfg,10);
+  //Serial.println();
+  feed_pitch1(28,cfg->orient);
+
+//-------------------------------------------
+
+  k = temperature();
+  sprintf(buf,"temperature:");
+  i = 48-strlen(buf);
+  sprintf(buf,"temperature:%*s%d C",i-5,"",k);
+  
+  printer_set_font(cfg,4);
+  reset_cmd();
+
   for(i=0;i<strlen(buf);i++){
     parse_serial_stream(cfg,buf[i]);
   }
   parse_serial_stream(cfg,10);
   reset_cmd();  
 
-  feed_pitch1(cfg->font->height,cfg->orient);
+//------------------------------------------  
+  sprintf(buf,"baudrate:");
+  i = 48-strlen(buf);
+  sprintf(buf,"baudrate:%*s%d",i-7,"",115200);
   
+  printer_set_font(cfg,4);
+  reset_cmd();
+
+  for(i=0;i<strlen(buf);i++){
+    parse_serial_stream(cfg,buf[i]);
+  }
+  parse_serial_stream(cfg,10);
+  reset_cmd();  
+  
+//------------------------------------------  
+  sprintf(buf,"version:");
+  i = 48-strlen(buf);
+  sprintf(buf,"version:%*s%.1f",i-4,"",0.1);
+  
+  printer_set_font(cfg,4);
+  reset_cmd();
+
+  for(i=0;i<strlen(buf);i++){
+    parse_serial_stream(cfg,buf[i]);
+  }
+  parse_serial_stream(cfg,10);
+  reset_cmd();  
+
+  
+  feed_pitch1(cfg->font->height,cfg->orient);
+//--------------------------------------------------------------  
   printer_set_font(cfg,0);
   reset_cmd();
  
-  Serial.println(strlen(url),DEC);
+  //Serial.println(strlen(url),DEC);
   for(i=0;i<strlen(url);i++){
     parse_serial_stream(cfg,url[i]);
     
@@ -172,7 +221,29 @@ void printer_test(CONFIG*cfg){
   parse_serial_stream(cfg,10);
   reset_cmd();
 
- 
+
+//-----------------------------------
+//grid
+
+  for(ch = 0;ch <16;ch++){
+    if(ch%2==0)
+      j = 0xff;
+    else
+      j = 0x00; 
+         
+    for(k=0;k<8;k++){
+      for(i=0;i<48;i++){
+        if(i % 2==0) {
+          buf[i]=j;
+        }else{
+          buf[i]=0xff-j;
+        }
+      }  
+      PrintDots8bit_split(cfg,(uint8_t*)buf,48);
+    }
+  }
+
+//--------------------------------------------------------
   feed_pitch1(cfg->font->height*2,cfg->orient);
   
 }
@@ -182,9 +253,9 @@ void printer_set_font(CONFIG*cfg,uint8_t fnbits){
       ret =  MID(fnbits,0,3);
       
       if(ret==0) {
-        cfg->font->width = 12;
-        cfg->font->height = 24;
-        cfg->font->data = console_font_12x24;
+        cfg->font->width = 8 ;
+        cfg->font->height = 16;
+        cfg->font->data = font_ttf_Px437_IBM_PS2thin1_8x16;
       }
       
       if(ret==1){
@@ -204,26 +275,8 @@ void printer_set_font(CONFIG*cfg,uint8_t fnbits){
         cfg->font->height = 14;
         cfg->font->data = font_pcf_7x14_ISO8859_1_7x14;
       }
-      /*
-      if(ret == 4){
-        cfg->font->width = 8 ;
-        cfg->font->height = 16;
-        cfg->font->data = font_ttf_Px437_IBM_ISO8_8x16;
-      }
       
-      if(ret == 5){
-        cfg->font->width = 8 ;
-        cfg->font->height = 16;
-        cfg->font->data = font_ttf_Px437_IBM_ISO9_8x16;
-      }
-      */
       if(ret == 4){
-        cfg->font->width = 8 ;
-        cfg->font->height = 16;
-        cfg->font->data = font_ttf_Px437_IBM_PS2thin1_8x16;
-      }
-      
-      if(ret == 5){
         cfg->font->width = 8 ;
         cfg->font->height = 16;
         cfg->font->data = font_ttf_Px437_IBM_PS2thin2_8x16;
@@ -458,7 +511,7 @@ void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
           ser_cache.data[ser_cache.idx]=input_ch;
           ser_cache.idx++;
          
-          a = ser_cache.idx*current_font.width+(ser_cache.idx-1)*0+ g_config.margin.width;          
+          a = (ser_cache.idx+1)*current_font.width+(ser_cache.idx)*0+ g_config.margin.width;          
           if( a >= MAX_DOTS)
           {
             print_lines8(cfg);
