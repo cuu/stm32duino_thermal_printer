@@ -107,7 +107,7 @@ void printer_test(CONFIG*cfg){
   uint16_t k;
   
   char buf[48];  
-  char *font_names[]={"8x16thin_1","5x7_ISO8859_1","6x12_ISO8859_1","7x14_ISO8859_1","8x16thin_1",NULL};
+  char *font_names[]={"8x16thin_1","5x7_ISO8859_1","6x12_ISO8859_1","7x14_ISO8859_1","8x16thin_2",NULL};
 
   /*
   char *selftest1[] = {
