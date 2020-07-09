@@ -2,7 +2,7 @@
 #ifndef FONT_PCF_5X7_ISO8859_1_5X7_H
 #define FONT_PCF_5X7_ISO8859_1_5X7_H
 
-const unsigned char font_pcf_5x7_ISO8859_1_5x7[]  = {
+const unsigned char font_pcf_5x7_ISO8859_1_5x7[] __FLASH__ = {
 
     /*
      * code=0, hex=0x00, ascii="^@"
@@ -2810,7 +2810,7 @@ const unsigned char font_pcf_5x7_ISO8859_1_5x7[]  = {
     0x00,  /* 00000 */
 
     /*
-     * code=255, hex=0xFF, ascii="!^ï¿½"
+     * code=255, hex=0xFF, ascii="!^Ÿ"
      */
     0x00,  /* 00000 */
     0xA8,  /* 10101 */

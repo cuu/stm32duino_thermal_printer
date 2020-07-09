@@ -2,7 +2,7 @@
 #ifndef FONT_PCF_6X12_ISO8859_1_6X12_H
 #define FONT_PCF_6X12_ISO8859_1_6X12_H
 
-const unsigned char font_pcf_6x12_ISO8859_1_6x12[]  = {
+const unsigned char font_pcf_6x12_ISO8859_1_6x12[] __FLASH__ = {
 
     /*
      * code=0, hex=0x00, ascii="^@"
@@ -4085,7 +4085,7 @@ const unsigned char font_pcf_6x12_ISO8859_1_6x12[]  = {
     0x00,  /* 000000 */
 
     /*
-     * code=255, hex=0xFF, ascii="!^ï¿½"
+     * code=255, hex=0xFF, ascii="!^Ÿ"
      */
     0x00,  /* 000000 */
     0x00,  /* 000000 */

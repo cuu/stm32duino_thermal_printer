@@ -7,13 +7,12 @@
 #include "pcf_5x7-ISO8859-1_5x7.h"
 #include "pcf_6x12-ISO8859-1_6x12.h"
 #include "pcf_7x14-ISO8859-1_7x14.h"
-//#include "ttf_Px437_IBM_ISO8_8x16.h"
-//#include "ttf_Px437_IBM_ISO9_8x16.h"
 
-#include "ttf_Px437_IBM_PS2thin1_8x16.h"
-#include "ttf_Px437_IBM_PS2thin2_8x16.h"
 
-//#include "ttf_Px437_IBM_PS2thin3_8x16.h"
+#include "ttf_Px437_PS2thin1_8x16.h"
+#include "ttf_Px437_PS2thin2_8x16.h"
+
+
 
 #include "config.h"
 #include "utils.h"
@@ -64,12 +63,12 @@ void init_printer(){
   current_font.width=6;current_font.height=12; current_font.data = font_pcf_6x12_ISO8859_1_6x12;
   current_font.width=7; current_font.height=14; current_font.data = font_pcf_7x14_ISO8859_1_7x14;
 
-  //current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_IBM_ISO8_8x16;
-  //current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_IBM_ISO9_8x16;
+  //current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_ISO8_8x16;
+  //current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_ISO9_8x16;
   
-  current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_IBM_PS2thin2_8x16;
+  current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_PS2thin2_8x16;
 */
-  current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_IBM_PS2thin1_8x16;
+  current_font.width=8;current_font.height=16; current_font.data= font_ttf_Px437_PS2thin1_8x16;
 
 
   ser_cache.idx=0;
@@ -170,7 +169,7 @@ NULL
 
 //---------------------------------------------     
 
-  for(i=1;i<5;i++){
+  for(i=1;i<4;i++){
     printer_set_font(cfg,0);
     reset_cmd();
     for(j=0;j<strlen(font_names[i]);j++){
@@ -199,6 +198,24 @@ NULL
   parse_serial_stream(cfg,10);
   
   printer_set_font(cfg,0);
+  reset_cmd();
+  for(ch = 33;ch<127;ch++){
+    parse_serial_stream(cfg,ch);      
+    //Serial.print(ch,DEC);
+  }
+  parse_serial_stream(cfg,10);
+  //Serial.println();
+  feed_pitch1(48,cfg->orient);
+
+
+  printer_set_font(cfg,0);
+  reset_cmd();
+  for(j=0;j<strlen(font_names[0]);j++){    
+    parse_serial_stream(cfg,font_names[4][j]);      
+  }  
+  parse_serial_stream(cfg,10);
+  
+  printer_set_font(cfg,4);
   reset_cmd();
   for(ch = 33;ch<127;ch++){
     parse_serial_stream(cfg,ch);      
@@ -351,7 +368,7 @@ void printer_set_font(CONFIG*cfg,uint8_t fnbits){
       if(ret==0) {
         cfg->font->width = 8 ;
         cfg->font->height = 16;
-        cfg->font->data = font_ttf_Px437_IBM_PS2thin1_8x16;
+        cfg->font->data = font_ttf_Px437_PS2thin1_8x16;
       }
       
       if(ret==1){
@@ -375,7 +392,7 @@ void printer_set_font(CONFIG*cfg,uint8_t fnbits){
       if(ret == 4){
         cfg->font->width = 8 ;
         cfg->font->height = 16;
-        cfg->font->data = font_ttf_Px437_IBM_PS2thin2_8x16;
+        cfg->font->data = font_ttf_Px437_PS2thin2_8x16;
       }  
 }
 
