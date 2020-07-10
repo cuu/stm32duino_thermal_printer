@@ -99,6 +99,65 @@ void init_printer(){
 
 const  char url[]  ={"Powered by clockworkpi.com"};
 
+void label_print_f(CONFIG*cfg,char*label,float m,char*last){
+  char buf[48];
+  uint8_t i,j;
+
+  
+  if(m == -1.0)
+    sprintf(buf,"%s",last);
+  else
+    sprintf(buf,"%0.2f%s",m,last);
+  
+  j = strlen(buf);
+  i = 48-strlen(label)-j-1; 
+
+  if(m == -1.0)
+    sprintf(buf,"%s%*s%s",label,i,"",last);
+  else
+    sprintf(buf,"%s%*s%0.2f%s",label,i,"",m,last);
+  
+  printer_set_font(cfg,4);
+  reset_cmd();
+
+  for(i=0;i<strlen(buf);i++){
+    parse_serial_stream(cfg,buf[i]);
+  }
+  parse_serial_stream(cfg,10);
+  reset_cmd();  
+
+  
+}
+
+void label_print_i(CONFIG*cfg,char*label,int m,char*last){
+  char buf[48];
+  uint8_t i,j;
+
+  if(m == -1)
+    sprintf(buf,"%s",last);
+  else
+    sprintf(buf,"%d%s",m,last);
+  
+  j = strlen(buf);
+  i = 48-strlen(label)-j-1; 
+
+  if(m == -1)
+    sprintf(buf,"%s%*s%s",label,i,"",last);
+  else
+    sprintf(buf,"%s%*s%d%s",label,i,"",m,last);
+  
+  printer_set_font(cfg,4);
+  reset_cmd();
+
+  for(i=0;i<strlen(buf);i++){
+    parse_serial_stream(cfg,buf[i]);
+  }
+  parse_serial_stream(cfg,10);
+  reset_cmd();  
+
+  
+}
+
 void printer_test(CONFIG*cfg){
 
   uint8_t i,j;
@@ -144,7 +203,7 @@ NULL
   feed_pitch1(15,cfg->orient);
 
   cfg->align = ALIGN_CENTER;
-  /*
+  /* //selftest1
   for(i=0;i<5;i++){
     printer_set_font(cfg,0);
     reset_cmd();
@@ -154,6 +213,7 @@ NULL
     parse_serial_stream(cfg,10); 
   }
   */
+  
   for(i=0;i<6;i++){
     printer_set_font(cfg,1);
     reset_cmd();
@@ -228,99 +288,22 @@ NULL
 //-------------------------------------------
 
   k = temperature();
-  sprintf(buf,"Temperature:");
-  i = 48-strlen(buf);
-  sprintf(buf,"Temperature:%*s%d C",i-5,"",k);
-  
-  printer_set_font(cfg,4);
-  reset_cmd();
-
-  for(i=0;i<strlen(buf);i++){
-    parse_serial_stream(cfg,buf[i]);
-  }
-  parse_serial_stream(cfg,10);
-  reset_cmd();  
+  label_print_i(cfg,"Temperature:",k," C");
 //--------------------------------------------------------
-  sprintf(buf,"Darkness setting:");
-  i = 48-strlen(buf);
-  sprintf(buf,"Darkness setting:%*s0-0xF",i-7,"");
+
+  label_print_i(cfg,"Darkness setting:",cfg->density," (Light 0-15 Dark)");
   
-  printer_set_font(cfg,4);
-  reset_cmd();
-
-  for(i=0;i<strlen(buf);i++){
-    parse_serial_stream(cfg,buf[i]);
-  }
-  parse_serial_stream(cfg,10);
-  reset_cmd();  
-
-  sprintf(buf,"Paper width:");
-  i = 48-strlen(buf);
-  sprintf(buf,"Paper width:%*s58mm",i-5,"");
+  label_print_i(cfg,"Paper width:",-1,"58mm");
+  label_print_i(cfg,"Print width:",-1,"48mm");
   
-  printer_set_font(cfg,4);
-  reset_cmd();
-
-  for(i=0;i<strlen(buf);i++){
-    parse_serial_stream(cfg,buf[i]);
-  }
-  parse_serial_stream(cfg,10);
-  reset_cmd();    
+  label_print_i(cfg,"Baudrate:",115200,"");
+  label_print_i(cfg,"Data bits:",8,"");
+  label_print_i(cfg,"Stop bits:",1,"");
 //------------------------------------------  
-  sprintf(buf,"Baudrate:");
-  i = 48-strlen(buf);
-  sprintf(buf,"Baudrate:%*s%d",i-7,"",115200);
-  
-  printer_set_font(cfg,4);
-  reset_cmd();
 
-  for(i=0;i<strlen(buf);i++){
-    parse_serial_stream(cfg,buf[i]);
-  }
-  parse_serial_stream(cfg,10);
-  reset_cmd();  
-//---------------------------------------------------
-  sprintf(buf,"Data bits:");
-  i = 48-strlen(buf);
-  sprintf(buf,"Data bits:%*s%d bits",i-7,"",8);
-  
-  printer_set_font(cfg,4);
-  reset_cmd();
-
-  for(i=0;i<strlen(buf);i++){
-    parse_serial_stream(cfg,buf[i]);
-  }
-  parse_serial_stream(cfg,10);
-  reset_cmd();
-//////////////////////////////////  
-  sprintf(buf,"Stop bits:");
-  i = 48-strlen(buf);
-  sprintf(buf,"Stop bits:%*s%d bit",i-6,"",1);
-  
-  printer_set_font(cfg,4);
-  reset_cmd();
-
-  for(i=0;i<strlen(buf);i++){
-    parse_serial_stream(cfg,buf[i]);
-  }
-  parse_serial_stream(cfg,10);
-  reset_cmd();    
-  
 //------------------------------------------  
-  sprintf(buf,"Version:");
-  i = 48-strlen(buf);
-  sprintf(buf,"Version:%*s%.1f",i-4,"",0.1);
-  
-  printer_set_font(cfg,4);
-  reset_cmd();
-
-  for(i=0;i<strlen(buf);i++){
-    parse_serial_stream(cfg,buf[i]);
-  }
-  parse_serial_stream(cfg,10);
-  reset_cmd();  
-
-  
+  label_print_f(cfg,"Firmware version:",0.1,"");
+    
   feed_pitch1(cfg->font->height,cfg->orient);
 //--------------------------------------------------------------  
   printer_set_font(cfg,0);
