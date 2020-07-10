@@ -418,8 +418,7 @@ void print_lines8(CONFIG*cfg) {
   lastw=0;
   lastj=0;
 
-  //DEBUG("left",left);
-  
+  //DEBUG("left",left);  
   while(left>0){
     i = lastidx;
     while(row<current_font.height){

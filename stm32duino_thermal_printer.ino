@@ -577,9 +577,12 @@ void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
     }else {//PRINT_STATE
       switch(input_ch){
         case ASCII_LF:
+          if(ser_cache.idx == 0){
+           feed_pitch1(cfg->font->height,cfg->orient);
+          }
           print_lines8(cfg);
           reset_cmd();
-          //feed_pitch1(cfg->font->height,cfg->orient);
+          
           cfg->state = PRINT_STATE;
         break;
         case ASCII_DC2:
