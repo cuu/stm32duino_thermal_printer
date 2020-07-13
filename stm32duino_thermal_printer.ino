@@ -382,6 +382,7 @@ void printer_set_font(CONFIG*cfg,uint8_t fnbits){
 void parse_cmd(CONFIG*cfg,uint8_t *cmd, uint8_t cmdidx){
   
   uint8_t ret;
+
   
   if(cmdidx >1){
     //ESC 2
@@ -539,10 +540,12 @@ void parse_cmd(CONFIG*cfg,uint8_t *cmd, uint8_t cmdidx){
         cfg->img->idx = 0;
         cfg->img->width = width;
         cfg->img->need_print=1;
-        Serial.println(cfg->img->width,DEC);
 
        }
-      reset_cmd();
+       // do not reset_cmd()
+       cmd_idx = 0;
+       ser_cache.idx=0;
+       
     }
   }
   
@@ -572,9 +575,10 @@ void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
         if(cfg->img->need_print==1){
           print_image8(cfg);
         }
+        reset_cmd();
         cfg->state = PRINT_STATE;
       }
-    }else {//PRINT_STATE
+    }else {//PRINT_STATE      
       switch(input_ch){
         case ASCII_LF:
           if(ser_cache.idx == 0){
@@ -582,18 +586,24 @@ void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
           }
           print_lines8(cfg);
           reset_cmd();
-          
-          cfg->state = PRINT_STATE;
         break;
         case ASCII_DC2:
+          cmd[cmd_idx] = input_ch;
+          cfg->state = ESC_STATE;
+          cmd_idx++;
+          break;          
         case ASCII_GS: 
+          cmd[cmd_idx] = input_ch;
+          cfg->state = ESC_STATE;
+          cmd_idx++;
+          break;        
         case ASCII_ESC:
           cmd[cmd_idx] = input_ch;
           cfg->state = ESC_STATE;
           cmd_idx++;
           break;
         default:
-          
+
           if(cfg->state ==  ESC_STATE) {
             cmd[cmd_idx] = input_ch;
             cmd_idx++;
@@ -601,21 +611,19 @@ void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
               parse_cmd(cfg,cmd,cmd_idx);
             }else{
               reset_cmd();
-              cfg->state = PRINT_STATE;
             }
-            
           }
-          
-
+                    
           ser_cache.data[ser_cache.idx]=input_ch;
           ser_cache.idx++;
-         
+
           a = (ser_cache.idx+1)*current_font.width+(ser_cache.idx)*0+ g_config.margin.width;          
           if( a >= MAX_DOTS)
           {
             print_lines8(cfg);
             reset_cmd();
           }
+          break;
       }
     } 
   

@@ -122,7 +122,7 @@
 #define ALIGN_RIGHT 2
 
 #define MAX_DOTS 384
-#define IMAGE_MAX 9216
+#define IMAGE_MAX 9224
 
 #define BITS8 8
 #define PRINTER_BITS 384
