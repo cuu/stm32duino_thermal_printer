@@ -54,7 +54,7 @@ void init_printer(){
   img_cache.idx=0;
   img_cache.num=0;
   img_cache.width=0;
-
+  
   img_cache.need_print=0;
   img_cache.revert_bits = 0;
 

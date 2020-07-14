@@ -108,9 +108,9 @@
 #define ASCII_EOT   4  // End of Transmission
 #define ASCII_DLE  16  // Data Link Escape
 #define ASCII_DC2  18  // Device control 2
-#define ASCII_ESC  27  // Escape
-#define ASCII_FS   28  // Field separator
-#define ASCII_GS   29  // Group separator
+#define ASCII_ESC  27  // Escape //0x1b
+#define ASCII_FS   28  // Field separator//0x1c
+#define ASCII_GS   29  // Group separator //0x1d
 
 #define PRINT_STATE 0
 #define ESC_STATE 1
@@ -151,6 +151,7 @@ typedef struct ImageCache{
   uint16_t idx;
   uint16_t num;
   uint16_t width;
+  uint16_t height;
   uint8_t need_print:1;
   uint8_t revert_bits:1;//MSB OR LSB
   uint8_t cache[IMAGE_MAX]; // 48x192bytes(384x192 pixels) ,max

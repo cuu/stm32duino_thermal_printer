@@ -522,15 +522,12 @@ void print_lines8(CONFIG*cfg) {
 void print_image8(CONFIG*cfg){
 
   uint16_t height;
-
-  height = cfg->img->num / cfg->img->width;
-  
   uint16_t x,y,addr;
   
   uint8_t LinePixels[MAXPIXELS];
 
   uint8_t maxchars= PRINTER_BITS/8;
-  
+  height  = cfg->img->num / cfg->img->width;
   y=0;
   addr = 0;
   
@@ -540,14 +537,16 @@ void print_image8(CONFIG*cfg){
     while( x < cfg->img->width )
     {
       addr  = x+y*cfg->img->width;
+
+     
       if(cfg->img->revert_bits > 0)//LSB
         LinePixels[x] = invert_bit(cfg->img->cache[addr]);
       else
         LinePixels[x] = cfg->img->cache[addr];
-        
+      
       x++;
     }
-    //Serial.println(x,DEC);
+    
     if(IsPaper()== IS_PAPER) PrintDots8bit_split(cfg,LinePixels,x);
     
     //feed_pitch1(FEED_PITCH,BACKWARD);
