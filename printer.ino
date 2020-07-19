@@ -560,3 +560,22 @@ void print_image8(CONFIG*cfg){
   cfg->img->width = 0;
   
 }
+
+void print_cut_line(CONFIG*cfg){
+  uint8_t bs,i;
+
+  bs= PRINTER_BITS/ cfg->font->width;
+  bs-=1;
+ 
+  reset_cmd();
+  
+  for(i=0;i<bs;i++){
+    if(i%2==0){
+      parse_serial_stream(cfg,'=');
+    }else{
+      parse_serial_stream(cfg,'-');
+    }
+  }
+  parse_serial_stream(cfg,ASCII_FF);
+  
+}

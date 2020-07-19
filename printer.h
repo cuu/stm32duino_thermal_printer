@@ -33,6 +33,6 @@ void print_lines8(CONFIG*);
 uint8_t invert_bit(uint8_t a);
 
 void print_image8(CONFIG*);
-
+void print_cut_line(CONFIG*);
 
 #endif

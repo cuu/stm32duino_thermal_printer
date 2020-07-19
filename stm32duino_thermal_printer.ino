@@ -399,8 +399,9 @@ void parse_cmd(CONFIG*cfg,uint8_t *cmd, uint8_t cmdidx){
     }
     //DC2 T  printer test page
     if(cmd[0] == ASCII_DC2 && cmd[1] == 0x54){
-      printer_test(cfg);
       reset_cmd();
+      printer_test(cfg);
+      
     }
   }
   
@@ -491,7 +492,18 @@ void parse_cmd(CONFIG*cfg,uint8_t *cmd, uint8_t cmdidx){
         cfg->density = ret;
         reset_cmd();
      }
-     
+
+
+     //GS V \0 or GS V \1
+     if(cmd[0] == ASCII_GS && cmd[1] == 0x56){
+        
+        ret = cmd[2];
+        reset_cmd();//When using parse_serial_stream function internally, reset_cmd() first
+        
+        print_cut_line(cfg);
+        
+        return;
+     }
      
   }
 
@@ -584,6 +596,10 @@ void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
           if(ser_cache.idx == 0){
            feed_pitch1(cfg->font->height,cfg->orient);
           }
+          print_lines8(cfg);
+          reset_cmd();
+        break;
+        case ASCII_FF:
           print_lines8(cfg);
           reset_cmd();
         break;
