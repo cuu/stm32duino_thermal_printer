@@ -6,7 +6,7 @@
 
 #define ALINE Serial.println();
 
-void Delayus(unsigned int _us);
+void delayus(unsigned int _us);
 
 uint8_t invert_bit(uint8_t a);
 

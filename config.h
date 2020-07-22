@@ -68,11 +68,12 @@
 #define ERROR_FEED_PITCH  ((uint8_t) 0x01)
 #define IS_PAPER          0x00
 #define NO_PAPER          0x01
+#define HOT_PRINTER       0x02
+
 #define FORWARD           0x00
 #define BACKWARD          0x01
 
-//#define FEED_PITCH   2
-
+#define HOT 64
 
 #define BCoefficent       3950
 #define RthNominal        30000

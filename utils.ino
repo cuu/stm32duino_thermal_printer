@@ -1,6 +1,6 @@
 #include "utils.h"
 
-void Delayus(unsigned int _us){
+void delayus(unsigned int _us){
   delayMicroseconds(_us);
 }
 

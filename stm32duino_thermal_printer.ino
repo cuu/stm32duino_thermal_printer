@@ -38,6 +38,7 @@ CONFIG g_config;
 void printer_set_font(CONFIG*cfg,uint8_t fnbits);
 void parse_serial_stream(CONFIG*cfg,uint8_t input_ch);
 
+
 void reset_cmd(){
   cmd_idx = 0;
   ser_cache.idx=0;
@@ -335,7 +336,7 @@ NULL
           buf[i]=0xff-j;
         }
       }  
-      PrintDots8bit_split(cfg,(uint8_t*)buf,48);
+      print_dots_8bit_split(cfg,(uint8_t*)buf,48);
     }
   }
 
@@ -408,12 +409,14 @@ void parse_cmd(CONFIG*cfg,uint8_t *cmd, uint8_t cmdidx){
   if(cmdidx > 2){
      //ESC j n
      if(cmd[0] == ASCII_ESC && cmd[1] == 0x4a){
+        
         print_lines8(cfg);
         feed_pitch1(cmd[2],BACKWARD);
         reset_cmd();
      }
      //ESC d n
      if(cmd[0] == ASCII_ESC && cmd[1] == 0x64){
+        
         print_lines8(cfg);
         
         feed_pitch1(cmd[2]*cfg->font->height,BACKWARD);
@@ -565,17 +568,16 @@ void parse_cmd(CONFIG*cfg,uint8_t *cmd, uint8_t cmdidx){
 
 void setup() {
   
-  Header_Init();
-  Header_Init1();
+  header_init();
+  header_init1();
  
-  ClearPrinterBuffer();
+  clear_printer_buffer();
   
   Serial.begin(115200); 
 
   init_printer();
   
 }
-
 
 void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
   uint16_t a;
@@ -590,7 +592,15 @@ void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
         reset_cmd();
         cfg->state = PRINT_STATE;
       }
-    }else {//PRINT_STATE      
+    }else if(cfg->state ==  ESC_STATE) { 
+      cmd[cmd_idx] = input_ch;
+      cmd_idx++;
+      if(cmd_idx < 10){
+        parse_cmd(cfg,cmd,cmd_idx);
+      }else{
+        reset_cmd();
+      }
+    }else{ //PRINT_STATE
       switch(input_ch){
         case ASCII_LF:
           if(ser_cache.idx == 0){
@@ -619,17 +629,6 @@ void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
           cmd_idx++;
           break;
         default:
-
-          if(cfg->state ==  ESC_STATE) {
-            cmd[cmd_idx] = input_ch;
-            cmd_idx++;
-            if(cmd_idx < 10){
-              parse_cmd(cfg,cmd,cmd_idx);
-            }else{
-              reset_cmd();
-            }
-          }
-                    
           ser_cache.data[ser_cache.idx]=input_ch;
           ser_cache.idx++;
 
@@ -639,12 +638,11 @@ void parse_serial_stream(CONFIG*cfg,uint8_t input_ch){
             print_lines8(cfg);
             reset_cmd();
           }
-          break;
+        break;  
       }
-    } 
+    }
   
 }
-
 
 void loop() {
   

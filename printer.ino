@@ -6,47 +6,55 @@
 #include "printer.h"
 
 uint16_t STBx[] = {STB1_PIN,STB2_PIN,STB3_PIN,STB4_PIN,STB5_PIN,STB6_PIN};
+uint8_t as;
 
-void Printer_SendWorld8(uint8_t World)
+void printer_send_data8(uint8_t w)
 {
   digitalWrite(SPI1_NSS_PIN, LOW); // manually take CSN low for SPI_1 transmission
-  SPI.transfer(World); //Send the HEX data 0x55 over SPI-1 port and store the received byte to the <data> variable.
-  //SPI.transfer16(World);
+  SPI.transfer(w); //Send the HEX data 0x55 over SPI-1 port and store the received byte to the <data> variable.
+  //SPI.transfer16(w);
   digitalWrite(SPI1_NSS_PIN, HIGH); // manually take CSN high between spi transmissions
   
 }
 
 
-void ClearPrinterBuffer()
+void clear_printer_buffer()
 {
   uint8_t i= 0;
   
    for(i=0;i<48;i++)
-     Printer_SendWorld8(0x00);
+     printer_send_data8(0x00);
   
   LATCH_ENABLE;
-  Delayus(1);
+  delayus(1);
   LATCH_DISABLE;
-  Delayus(1);
+  delayus(1);
 }
 
 
 uint8_t IsPaper()
 {
   uint8_t status;
+  uint8_t tmp;
+  
   ENABLE_PEM;
-  //delay(10);
+
   if(!ASK4PAPER)
   {status = IS_PAPER;}
   else
   {status = NO_PAPER;}
   DISABLE_PEM;
 
+  tmp = temperature();
+  if (tmp >= HOT){
+    status |= HOT_PRINTER;
+  }
+  
   return status;
 }
 
 
-uint8_t Header_Init() {
+uint8_t header_init() {
   
   uint8 pin[] = {THERMISTORPIN};
   
@@ -89,24 +97,24 @@ uint8_t Header_Init() {
 
 uint8_t current_pos = 1; 
 
-uint8_t Header_Init1() {
+uint8_t header_init1() {
   
   pinMode(PA_PIN,OUTPUT);
   pinMode(PNA_PIN,OUTPUT);
   pinMode(PB_PIN,OUTPUT);
   pinMode(PNB_PIN,OUTPUT);
 
-
+  as = 0;
 
   return ASK4PAPER;
 }
 
-void Motor_Stepper_Pos1(uint8_t Position)
+void motor_stepper_pos1(uint8_t position)
 {
-//  Position = 9 - Position;
-//  Position = (Position+1)/2;
+//  position = 9 - position;
+//  position = (position+1)/2;
 
-  switch(Position){
+  switch(position){
     case 1:
       digitalWrite(PA_PIN,HIGH);
       digitalWrite(PNA_PIN,LOW);
@@ -158,12 +166,12 @@ void Motor_Stepper_Pos1(uint8_t Position)
   }
 }
 
-void Motor_Stepper_Pos2(uint8_t Position)//forward
+void motor_stepper_pos2(uint8_t position)//forward
 {
-//  Position = 9 - Position;
-//  Position = (Position+1)/2;
+//  position = 9 - position;
+//  position = (position+1)/2;
   delayMicroseconds(6700);
-  switch(Position){
+  switch(position){
     case 0:
       digitalWrite(PA_PIN,LOW);
       digitalWrite(PNA_PIN,LOW);
@@ -211,7 +219,7 @@ uint8_t feed_pitch1(uint64_t lines, uint8_t forward_backward)
     MOTOR_ENABLE2;
     while(lines>0)
     {
-      Motor_Stepper_Pos2(pos);     /* 0.0625mm */
+      motor_stepper_pos2(pos);     /* 0.0625mm */
       
       if(pos >= 1 && pos <= 4)
         pos = pos + (1 - 2*forward_backward); // adding or subtracting
@@ -232,7 +240,7 @@ uint8_t feed_pitch1(uint64_t lines, uint8_t forward_backward)
 
 }
 
-void PrintDots8bit_split(CONFIG*cfg,uint8_t *Array, uint8_t characters) 
+void print_dots_8bit_split(CONFIG*cfg,uint8_t *Array, uint8_t characters) 
 {
   uint8_t i=0,y=0, MAX=48;
   uint8_t blank;
@@ -249,13 +257,13 @@ void PrintDots8bit_split(CONFIG*cfg,uint8_t *Array, uint8_t characters)
     if(pts > MAX_PRINT_PTS) {
       memset(temp,0,48);
       memcpy(temp,_array,i);
-      PrintDots8bit(cfg,temp,characters,0);
+      print_dots_8bit(cfg,temp,characters,0);
       pts = bits_number(_array[i]);
       memset(_array,0,i);
     }else if(pts==MAX_PRINT_PTS) {
       memset(temp,0,48);
       memcpy(temp,_array,i+1);      
-      PrintDots8bit(cfg,temp,characters,0);
+      print_dots_8bit(cfg,temp,characters,0);
       pts=0;
       memset(_array,0,i+1);
     }
@@ -263,7 +271,7 @@ void PrintDots8bit_split(CONFIG*cfg,uint8_t *Array, uint8_t characters)
   }
 
   if(pts >0){
-    PrintDots8bit(cfg,_array,characters,0);
+    print_dots_8bit(cfg,_array,characters,0);
     pts = 0;
   }
 
@@ -272,7 +280,7 @@ void PrintDots8bit_split(CONFIG*cfg,uint8_t *Array, uint8_t characters)
   return;
 }
 
-void PrintDots8bit(CONFIG*cfg,uint8_t *Array, uint8_t characters,uint8_t feed_num) 
+void print_dots_8bit(CONFIG*cfg,uint8_t *Array, uint8_t characters,uint8_t feed_num) 
 {
   uint8_t i=0,y=0, MAX=48;
   uint8_t blank;
@@ -282,12 +290,12 @@ void PrintDots8bit(CONFIG*cfg,uint8_t *Array, uint8_t characters,uint8_t feed_nu
       if(cfg->align == 0) {
         while((i<characters) && (i < MAX))
         {
-          Printer_SendWorld8(Array[i]);
+          printer_send_data8(Array[i]);
           i++;
         }  
         while( i < MAX)
         {
-          Printer_SendWorld8(0x00);
+          printer_send_data8(0x00);
           i++;
         }
       }else if(cfg->align==1){// center
@@ -295,26 +303,26 @@ void PrintDots8bit(CONFIG*cfg,uint8_t *Array, uint8_t characters,uint8_t feed_nu
          blank = (MAX-characters)/2;
          
          for(i=0;i<blank;i++){
-          Printer_SendWorld8(0x00);
+          printer_send_data8(0x00);
          }
          for(i=0;i<characters;i++){
-          Printer_SendWorld8(Array[i]);
+          printer_send_data8(Array[i]);
          }
          for(i=0;i<(MAX-characters-blank);i++){
-          Printer_SendWorld8(0x00);
+          printer_send_data8(0x00);
          }
       }else if(cfg->align==2){
         blank = MAX-characters;
         for(i=0;i<blank;i++){
-          Printer_SendWorld8(0x00);
+          printer_send_data8(0x00);
         }
         for(i=0;i<characters;i++){
-          Printer_SendWorld8(Array[i]);
+          printer_send_data8(Array[i]);
         }      
       }
       
       LATCH_ENABLE;
-      Delayus(1);
+      delayus(1);
       LATCH_DISABLE;
       delayMicroseconds(1);
       
@@ -328,9 +336,9 @@ void PrintDots8bit(CONFIG*cfg,uint8_t *Array, uint8_t characters,uint8_t feed_nu
 
                  
             digitalWrite(STBx[y],HIGH); 
-            Delayus(HEAT_TIME+cfg->density*46);
+            delayus(HEAT_TIME+cfg->density*46);
             digitalWrite(STBx[y],LOW);
-            Delayus(14);
+            delayus(14);
             i++;
           }
          
@@ -498,7 +506,7 @@ void print_lines8(CONFIG*cfg) {
       if(IsPaper()== IS_PAPER){
         //DEBUG("dot_line_idx",dot_line_idx);
         //DEBUG("dot_line_bits",dot_line_bitsidx);
-        PrintDots8bit_split(cfg,dot_line_data,dot_line_idx+1);
+        print_dots_8bit_split(cfg,dot_line_data,dot_line_idx+1);
       }
         
       row++;
@@ -547,12 +555,12 @@ void print_image8(CONFIG*cfg){
       x++;
     }
     
-    if(IsPaper()== IS_PAPER) PrintDots8bit_split(cfg,LinePixels,x);
+    if(IsPaper()== IS_PAPER) print_dots_8bit_split(cfg,LinePixels,x);
     
     //feed_pitch1(FEED_PITCH,BACKWARD);
     y++;
   }
-  feed_pitch1(cfg->feed_pitch,cfg->orient);
+  //feed_pitch1(cfg->feed_pitch,cfg->orient);
   cfg->img->need_print= 0;
   
   cfg->img->num = 0;
