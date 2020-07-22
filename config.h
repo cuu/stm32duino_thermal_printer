@@ -108,7 +108,7 @@
 #define ASCII_CR  '\r' // Carriage return
 #define ASCII_EOT   4  // End of Transmission
 #define ASCII_DLE  16  // Data Link Escape
-#define ASCII_DC2  18  // Device control 2
+#define ASCII_DC2  18  // Device control 2 //0x12
 #define ASCII_ESC  27  // Escape //0x1b
 #define ASCII_FS   28  // Field separator//0x1c
 #define ASCII_GS   29  // Group separator //0x1d
