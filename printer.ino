@@ -217,6 +217,7 @@ uint8_t feed_pitch1(uint64_t lines, uint8_t forward_backward)
   {
     MOTOR_ENABLE1;
     MOTOR_ENABLE2;
+    ENABLE_VH;
     while(lines>0)
     {
       motor_stepper_pos2(pos);     /* 0.0625mm */
@@ -230,6 +231,7 @@ uint8_t feed_pitch1(uint64_t lines, uint8_t forward_backward)
     }
     MOTOR_DISABLE1;
     MOTOR_DISABLE2;
+    DISABLE_VH;
   }
   else
   {
